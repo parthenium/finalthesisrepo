@@ -169,7 +169,26 @@ def load_data(path, train_ratio, val_ratio, seed):
             tmp, test_size=test_ratio/(val_ratio+test_ratio), random_state=seed)
 
     print(f"  Train {len(tr):,} / Val {len(vl):,} / Test {len(te):,}")
-
+    
+    # Count article frequency in training set only
+    from collections import Counter
+    art_counts = Counter(
+        art 
+        for arts in df["articles"].iloc[tr] 
+        for art in arts
+    )
+    
+    # Keep only articles with >= 50 training cases
+    MIN_CASES = 50
+    active = {art for art, cnt in art_counts.items() if cnt >= MIN_CASES}
+    print(f"  Active articles (>= {MIN_CASES} cases): {len(active)} "
+          f"from {len(art_counts)} total")
+    print(f"  Kept: {sorted(active)}")
+    
+    # Filter article lists to only include active articles
+    df["articles"] = df["articles"].apply(
+        lambda arts: [a for a in arts if a in active]
+  
     mlb = MultiLabelBinarizer()
     mlb.fit(df["articles"].iloc[tr].tolist())
     print(f"  Articles ({len(mlb.classes_)}): {sorted(mlb.classes_)}")
