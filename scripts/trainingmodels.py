@@ -188,6 +188,7 @@ def load_data(path, train_ratio, val_ratio, seed):
     # Filter article lists to only include active articles
     df["articles"] = df["articles"].apply(
         lambda arts: [a for a in arts if a in active]
+    )
   
     mlb = MultiLabelBinarizer()
     mlb.fit(df["articles"].iloc[tr].tolist())
